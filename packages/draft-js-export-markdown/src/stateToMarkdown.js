@@ -123,6 +123,26 @@ class MarkupGenerator {
         );
         break;
       }
+      case BLOCK_TYPE.CHECKBOX_LIST_ITEM: {
+        let blockDepth = block.getDepth();
+        let lastBlock = this.getLastBlock();
+        let lastBlockType = lastBlock ? lastBlock.getType() : null;
+        let lastBlockDepth =
+          lastBlock && canHaveDepth(lastBlockType)
+            ? lastBlock.getDepth()
+            : null;
+        if (lastBlockType !== blockType && lastBlockDepth !== blockDepth - 1) {
+          this.insertLineBreaks(1);
+          // Insert an additional line break if following opposite list type.
+          if (lastBlockType === BLOCK_TYPE.ORDERED_LIST_ITEM) {
+            this.insertLineBreaks(1);
+          }
+        }
+        let indent = ' '.repeat(block.depth * 4);
+        let bracket = block.getData().get("checked") ? "- [ ]" : "- [x]";
+        this.output.push(indent + bracket + this.renderBlockContent(block) + '\n');
+        break;
+      }
       case BLOCK_TYPE.BLOCKQUOTE: {
         this.insertLineBreaks(1);
         this.output.push(' > ' + this.renderBlockContent(block) + '\n');
