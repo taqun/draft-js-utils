@@ -139,7 +139,7 @@ class MarkupGenerator {
           }
         }
         let indent = ' '.repeat(block.depth * 4);
-        let bracket = block.getData().get('checked') ? '- [x]' : '- [ ]';
+        let bracket = block.getData().get('checked') ? '- [x] ' : '- [ ] ';
         this.output.push(indent + bracket + this.renderBlockContent(block) + '\n');
         break;
       }
