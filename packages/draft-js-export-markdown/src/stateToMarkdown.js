@@ -123,7 +123,7 @@ class MarkupGenerator {
         );
         break;
       }
-      case BLOCK_TYPE.CHECKBOX_LIST_ITEM: {
+      case 'checkable-list-item': {
         let blockDepth = block.getDepth();
         let lastBlock = this.getLastBlock();
         let lastBlockType = lastBlock ? lastBlock.getType() : null;
@@ -139,7 +139,7 @@ class MarkupGenerator {
           }
         }
         let indent = ' '.repeat(block.depth * 4);
-        let bracket = block.getData().get("checked") ? "- [ ]" : "- [x]";
+        let bracket = block.getData().get('checked') ? '- [x]' : '- [ ]';
         this.output.push(indent + bracket + this.renderBlockContent(block) + '\n');
         break;
       }

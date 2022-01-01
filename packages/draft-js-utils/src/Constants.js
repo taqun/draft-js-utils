@@ -11,7 +11,6 @@ export const BLOCK_TYPE = {
   HEADER_SIX: 'header-six',
   UNORDERED_LIST_ITEM: 'unordered-list-item',
   ORDERED_LIST_ITEM: 'ordered-list-item',
-  CHECKBOX_LIST_ITEM: 'checkable-list-item',
   BLOCKQUOTE: 'blockquote',
   PULLQUOTE: 'pullquote',
   CODE: 'code-block',
