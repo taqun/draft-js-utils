@@ -15,11 +15,11 @@
     "build": "yarn build:cjs && yarn build:esm"
   },
   "dependencies": {
-    "draft-js-import-element": "^1.4.0",
+    "draft-js-import-element": "file:../draft-js-import-element",
     "synthetic-dom": "^1.4.0"
   },
   "peerDependencies": {
-    "draft-js": ">=0.10.0",
+    "draft-js": "file:../../../draft-js-utils",
     "immutable": "3.x.x"
   },
   "keywords": [

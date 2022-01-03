@@ -54,6 +54,7 @@ var block = {
   lheading: /^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,
   blockquote: /^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,
   list: /^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
+  checkablelist: /^( *)(bull) \[([\s|x])\] [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,
   paragraph: /^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|def))+)\n*/,
   text: /^[^\n]+/,
@@ -64,6 +65,11 @@ block.item = /^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;
 block.item = replace(block.item, 'gm')(/bull/g, block.bullet)();
 
 block.list = replace(block.list)(/bull/g, block.bullet)(
+  'hr',
+  '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))',
+)('def', '\\n+(?=' + block.def.source + ')')();
+
+block.checkablelist = replace(block.checkablelist)(/bull/g, block.bullet)(
   'hr',
   '\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))',
 )('def', '\\n+(?=' + block.def.source + ')')();
@@ -245,6 +251,86 @@ Lexer.prototype.token = function(src, top, bq) {
 
       this.tokens.push({
         type: 'blockquote_end',
+      });
+
+      continue;
+    }
+
+    // checkable list
+    if ((cap = this.rules.checkablelist.exec(src))) {
+      src = src.substring(cap[0].length);
+      bull = cap[2];
+
+      this.tokens.push({
+        type: 'list_start',
+        ordered: bull.length > 1,
+      });
+
+      // Get each top-level item.
+      cap = cap[0].match(this.rules.item);
+
+      next = false;
+      l = cap.length;
+      i = 0;
+
+      for (; i < l; i++) {
+        item = cap[i];
+        // checkablelist: /^( *)(bull) \[([\s|x])\] [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,
+        // block.bullet = /(?:[*+-]|\d+\.)/;
+
+
+        // Remove the list item's bullet
+        // so it is seen as the next token.
+        space = item.length;
+        item = item.replace(/^ *([*+-]|\d+\.) +/, '');
+        const checked = /^\[x\] /.test(item);
+        item = item.replace(/^\[[\s|x]\] +/, '');
+
+        // Outdent whatever the
+        // list item contains. Hacky.
+        if (~item.indexOf('\n ')) {
+          space -= item.length;
+          item = !this.options.pedantic
+            ? item.replace(new RegExp('^ {1,' + space + '}', 'gm'), '')
+            : item.replace(/^ {1,4}/gm, '');
+        }
+
+        // Determine whether the next list item belongs here.
+        // Backpedal if it does not belong in this list.
+        if (this.options.smartLists && i !== l - 1) {
+          b = block.bullet.exec(cap[i + 1])[0];
+          if (bull !== b && !(bull.length > 1 && b.length > 1)) {
+            src = cap.slice(i + 1).join('\n') + src;
+            i = l - 1;
+          }
+        }
+
+        // Determine whether item is loose or not.
+        // Use: /(^|\n)(?! )[^\n]+\n\n(?!\s*$)/
+        // for discount behavior.
+        loose = next || /\n\n(?!\s*$)/.test(item);
+        if (i !== l - 1) {
+          next = item.charAt(item.length - 1) === '\n';
+          if (!loose) {
+            loose = next;
+          }
+        }
+
+        this.tokens.push({
+          type: loose ? 'checkable_loose_item_start' : 'checkable_list_item_start',
+        });
+
+        // Recurse.
+        this.token(item, false, bq);
+
+        this.tokens.push({
+          type: 'checkable_list_item_end',
+          checked,
+        });
+      }
+
+      this.tokens.push({
+        type: 'list_end',
       });
 
       continue;
@@ -624,6 +710,12 @@ Renderer.prototype.listitem = function(childNode) {
   return new ElementNode('li', [], [childNode]);
 };
 
+Renderer.prototype.checkablelistitem = function(childNode, checked) {
+  var attrs = [];
+  attrs.push({name: 'checked', value: checked});
+  return new ElementNode('li', attrs, [childNode]);
+};
+
 Renderer.prototype.paragraph = function(childNode) {
   return new ElementNode('p', [], [childNode]);
 };
@@ -809,6 +901,26 @@ Parser.prototype.tok = function() {
       }
 
       return this.renderer.listitem(body);
+    }
+    case 'checkable_list_item_start': {
+      let body = new FragmentNode();
+
+      while (this.next().type !== 'checkable_list_item_end') {
+        body.appendChild(
+          this.token.type === 'text' ? this.parseText() : this.tok(),
+        );
+      }
+
+      return this.renderer.checkablelistitem(body, this.token.checked);
+    }
+    case 'checkable_loose_item_start': {
+      let body = new FragmentNode();
+
+      while (this.next().type !== 'checkable_list_item_end') {
+        body.appendChild(this.tok());
+      }
+
+      return this.renderer.checkablelistitem(body, this.token.checked);
     }
     case 'paragraph': {
       return this.renderer.paragraph(this.inline.parse(this.token.text));

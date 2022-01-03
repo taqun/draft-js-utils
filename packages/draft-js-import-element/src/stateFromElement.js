@@ -300,6 +300,13 @@ class ContentGenerator {
         data = {...data, language};
       }
     }
+    if (type === BLOCK_TYPE.UNORDERED_LIST_ITEM) {
+      let checked = element.getAttribute('checked');
+      if (checked !== undefined) {
+        type = 'checkable-list-item';
+        data = {...data, checked};
+      }
+    }
     let hasDepth = canHaveDepth(type);
     let allowRender = !SPECIAL_ELEMENTS.hasOwnProperty(tagName);
     if (!isCustomType && !hasSemanticMeaning(type)) {
@@ -491,6 +498,7 @@ function collapseWhiteSpace(
 
 function canHaveDepth(blockType: string): boolean {
   switch (blockType) {
+    case 'checkable-list-item':
     case BLOCK_TYPE.UNORDERED_LIST_ITEM:
     case BLOCK_TYPE.ORDERED_LIST_ITEM: {
       return true;
