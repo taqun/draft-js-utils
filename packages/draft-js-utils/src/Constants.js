@@ -19,7 +19,7 @@ export const BLOCK_TYPE = {
 
 export const ENTITY_TYPE = {
   LINK: 'LINK',
-  IMAGE: 'IMAGE',
+  IMAGE: 'IMG',
   EMBED: 'embed',
 };
 

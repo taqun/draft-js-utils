@@ -19,7 +19,7 @@
     "synthetic-dom": "^1.4.0"
   },
   "peerDependencies": {
-    "draft-js": "file:../../../draft-js-utils",
+    "draft-js": ">=0.10.0",
     "immutable": "3.x.x"
   },
   "keywords": [

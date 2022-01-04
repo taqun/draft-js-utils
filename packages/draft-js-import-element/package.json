@@ -15,7 +15,6 @@
     "build": "yarn build:cjs && yarn build:esm"
   },
   "dependencies": {
-    "draft-js-utils": "^1.4.0",
     "synthetic-dom": "^1.4.0"
   },
   "peerDependencies": {
