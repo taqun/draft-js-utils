@@ -274,22 +274,22 @@ if (!content.length) {
             return content.padEnd(content.length + rightPad);
           })
           .join('');
-        let entity = entityKey ? contentState.getEntity(entityKey) : null;
-        if (entity != null && entity.getType() === ENTITY_TYPE.LINK) {
-          let data = entity.getData();
-          let url = data.href || data.url || '';
-          let title = data.title ? ` "${escapeTitle(data.title)}"` : '';
-          return `[${content}](${encodeURL(url)}${title})`;
-        } else if (entity != null && entity.getType() === ENTITY_TYPE.IMAGE) {
-          let data = entity.getData();
-          let src = data.src || '';
-          let alt = data.alt ? `${escapeTitle(data.alt)}` : '';
-          return `![${alt}](${encodeURL(src)})`;
-        } else if (entity != null && entity.getType() === ENTITY_TYPE.EMBED) {
-          return entity.getData().url || content;
-        } else {
+        // let entity = entityKey ? contentState.getEntity(entityKey) : null;
+        // if (entity != null && entity.getType() === ENTITY_TYPE.LINK) {
+        //   let data = entity.getData();
+        //   let url = data.href || data.url || '';
+        //   let title = data.title ? ` "${escapeTitle(data.title)}"` : '';
+        //   return `[${content}](${encodeURL(url)}${title})`;
+        // } else if (entity != null && entity.getType() === ENTITY_TYPE.IMAGE) {
+        //   let data = entity.getData();
+        //   let src = data.src || '';
+        //   let alt = data.alt ? `${escapeTitle(data.alt)}` : '';
+        //   return `![${alt}](${encodeURL(src)})`;
+        // } else if (entity != null && entity.getType() === ENTITY_TYPE.EMBED) {
+        //   return entity.getData().url || content;
+        // } else {
           return content;
-        }
+        // }
       })
       .join('');
   }

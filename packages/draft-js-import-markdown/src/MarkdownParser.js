@@ -458,9 +458,9 @@ Lexer.prototype.token = function(src, top, bq) {
 
 var inline = {
   escape: /^\\([\\`*{}\[\]()#+\-.!_>])/,
-  link: /^!?\[(inside)\]\(href\)/,
-  reflink: /^!?\[(inside)\]\s*\[([^\]]*)\]/,
-  nolink: /^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,
+  link: noop,
+  reflink: noop,
+  nolink: noop,
   strong: /^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,
   em: /^\b_((?:__|[\s\S])+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,
   code: /^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,
@@ -473,12 +473,12 @@ var inline = {
 inline._inside = /(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;
 inline._href = /\s*(<(?:\\[<>]?|[^\s<>\\])*>|(?:\\[()]?|\([^\s\x00-\x1f\\]*\)|[^\s\x00-\x1f()\\])*?)/;
 
-inline.link = replace(inline.link)('inside', inline._inside)(
-  'href',
-  inline._href,
-)();
+// inline.link = replace(inline.link)('inside', inline._inside)(
+//   'href',
+//   inline._href,
+// )();
 
-inline.reflink = replace(inline.reflink)('inside', inline._inside)();
+// inline.reflink = replace(inline.reflink)('inside', inline._inside)();
 
 /**
  * Normal Inline Grammar
